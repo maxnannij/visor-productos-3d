@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Productos 3D</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="info">
+        <h1>Mi Producto Increíble</h1>
+        <p>Gira el modelo con el ratón y haz zoom con la rueda.</p>
+    </div>
+
+    <!-- El lienzo donde Three.js dibujará la escena -->
+    <canvas id="c"></canvas>
+
+    <!-- Importamos Three.js desde una CDN (Content Delivery Network) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <!-- Nuestro script principal -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>
