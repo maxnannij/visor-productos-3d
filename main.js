@@ -71,14 +71,16 @@ function loadModel(fileName) {
         currentModel.scale.set(scale, scale, scale);
         scene.add(currentModel);
 
-        // **IMPORTANTE**: Personaliza esta sección para tus modelos.
-        // Recorre el modelo en busca de materiales que deban brillar.
+        // Limita la intensidad emisiva de los materiales para evitar sobreexposición
         currentModel.traverse((child) => {
-    if (child.isMesh && child.material.name === 'Nombre_Del_Material_Brillante') {
-        child.material.emissive = new THREE.Color(0xffffff);
-        child.material.emissiveIntensity = 4; // Esto podría no estar funcionando si el nombre del material no coincide
-    }
-});
+            if (child.isMesh && child.material && child.material.emissive) {
+                if (child.material.emissiveIntensity > 20.0) {
+                    console.warn(`Intensidad emisiva muy alta detectada en ${child.material.name}! Reduciendo de ${child.material.emissiveIntensity} a 10.`);
+                    child.material.emissiveIntensity = 10;
+                }
+            }
+        });
+    });
 }
 
 function highlightActiveProduct(fileName) {
