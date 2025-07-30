@@ -1,17 +1,56 @@
-/* ... (Estilos de body, #c, loading-overlay sin cambios) ... */
+/* Reseteo básico y estilos generales */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #333;
+    overflow: hidden; /* Evita barras de scroll innecesarias */
+}
 
-/* Estilo para el panel de control principal */
-#main-controls {
+/* Superposición para el indicador de carga */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(84, 84, 84, 0.7); /* Coincide con el fondo oscuro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilo para los paneles de control */
+.panel {
     position: absolute;
-    top: 20px;
-    left: 20px;
     background-color: rgba(255, 255, 255, 0.85);
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     backdrop-filter: blur(5px);
-    width: 500px; /* Ancho ajustado para ambos controles */
-    max-width: 90vw; /* Asegura que no se desborde en pantallas pequeñas */
+}
+
+/* Panel principal superior izquierdo */
+#main-controls {
+    top: 20px;
+    left: 20px;
+    width: 500px;
+    max-width: 90vw;
 }
 
 .panel-header h1 {
@@ -26,15 +65,14 @@
     margin-top: 15px;
 }
 
-/* NUEVO: Contenedor para alinear buscador y selector */
 .search-select-container {
     display: flex;
     gap: 15px;
-    align-items: flex-end; /* Alinea los inputs en la base */
+    align-items: flex-end;
 }
 
 .search-select-container .control-group {
-    flex: 1; /* Hace que ambos grupos ocupen el espacio disponible */
+    flex: 1;
 }
 
 .control-group {
@@ -47,6 +85,7 @@
     font-weight: bold;
     font-size: 14px;
     color: #555;
+    text-align: center;
 }
 
 #search-box, #product-select {
@@ -62,24 +101,23 @@
     cursor: pointer;
 }
 
-/* NUEVO: Estilo para resaltar la opción seleccionada */
 #product-select option.active-product {
-    background-color: #ffebee; /* Un rojo muy suave */
-    color: #c62828; /* Texto rojo oscuro para contraste */
+    background-color: #ffebee;
+    color: #c62828;
     font-weight: bold;
 }
 
-/* NUEVO: Contenedor flotante para controles inferiores */
+/* Panel flotante inferior */
 #floating-controls {
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 20px;
+    gap: 30px;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.85);
     padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.85);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     backdrop-filter: blur(5px);
@@ -89,12 +127,11 @@
     align-items: center;
 }
 
-#light-slider {
+#bloom-slider {
     width: 150px;
     cursor: pointer;
 }
 
-/* NUEVO: Estilo para el selector de color */
 #bg-color-picker {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -107,64 +144,21 @@
     padding: 0;
 }
 #bg-color-picker::-webkit-color-swatch {
-    border-radius: 50%; /* Hacerlo circular */
+    border-radius: 50%;
     border: 2px solid #ccc;
 }
 #bg-color-picker::-moz-color-swatch {
     border-radius: 50%;
     border: 2px solid #ccc;
 }
-/* ... (todos los estilos anteriores sin cambios) ... */
 
-/* Estilo para reutilizar en todos los paneles */
-.panel {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.85);
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    backdrop-filter: blur(5px);
-}
-
-#main-controls {
-    top: 20px;
-    left: 20px;
-    width: 500px;
-    max-width: 90vw;
-}
-
-#floating-controls {
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-/* MODIFICADO: Estilo para el panel de control de Bloom */
-#bloom-controls {
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
-    width: 80px;
-    /* Aumentamos el padding vertical para dar más espacio */
-    padding: 30px 10px; 
-}
-
-#bloom-controls .control-group {
-    align-items: center;
-    gap: 15px;
-}
-
-/* MODIFICADO: Estilos para hacer el slider vertical más alto */
-#bloom-slider {
-    /* Aumentamos el width para que sea más alto. ¡Esta es la línea clave! */
-    width: 250px; 
-    height: 20px;
-    
-    -webkit-appearance: slider-vertical;
-    writing-mode: bt-lr;
-
-    cursor: pointer;
+/* Canvas de la escena 3D */
+#c {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: -1;
 }
