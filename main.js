@@ -1,4 +1,4 @@
-// Importaciones para Three.js y efectos de post-procesamiento
+// Importaciones (sin cambios)
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -17,10 +17,11 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const searchBox = document.getElementById('search-box');
 const productSelect = document.getElementById('product-select');
 const bgColorPicker = document.getElementById('bg-color-picker');
+const bloomSlider = document.getElementById('bloom-slider'); // Nuevo elemento
 
 // --- INICIALIZACIÓN DE THREE.JS ---
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(bgColorPicker.value); 
+scene.background = new THREE.Color("#545454"); 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 1.5, 6);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -28,7 +29,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ReinhardToneMapping;
 
-// --- LUCES FIJAS ---
+// --- LUCES FIJAS (sin cambios) ---
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -49,18 +50,17 @@ composer.addPass(renderScene);
 composer.addPass(bloomPass);
 composer.addPass(outputPass);
 
-// --- GESTOR DE CARGA Y CARGADOR ---
+// --- GESTOR DE CARGA Y CARGADOR (sin cambios) ---
 const loadingManager = new THREE.LoadingManager(() => { loadingOverlay.style.display = 'none'; });
 const gltfLoader = new GLTFLoader(loadingManager);
 
-// --- FUNCIONES DE LA APLICACIÓN ---
+// --- FUNCIONES DE LA APLICACIÓN (sin cambios) ---
 function loadModel(fileName) {
     loadingOverlay.style.display = 'flex';
     if (currentModel) scene.remove(currentModel);
     
     gltfLoader.load(`models/${fileName}`, (gltf) => {
         currentModel = gltf.scene;
-        // Centrado y escalado del modelo
         const box = new THREE.Box3().setFromObject(currentModel);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
@@ -70,25 +70,19 @@ function loadModel(fileName) {
         currentModel.scale.set(scale, scale, scale);
         scene.add(currentModel);
 
-        // **IMPORTANTE**: Personaliza esta sección para tus modelos.
-        // Recorre el modelo en busca de materiales que deban brillar.
         currentModel.traverse((child) => {
             if (child.isMesh && child.material.name === 'Nombre_Del_Material_Brillante') {
-                child.material.emissive = new THREE.Color(0xffffff); // Color del brillo
-                child.material.emissiveIntensity = 1; // Fuerza del brillo
+                child.material.emissive = new THREE.Color(0xffffff);
+                child.material.emissiveIntensity = 4;
             }
         });
     });
 }
 
 function highlightActiveProduct(fileName) {
-    Array.from(productSelect.options).forEach(option => {
-        option.classList.remove('active-product');
-    });
+    Array.from(productSelect.options).forEach(option => option.classList.remove('active-product'));
     const activeOption = productSelect.querySelector(`option[value="${fileName}"]`);
-    if (activeOption) {
-        activeOption.classList.add('active-product');
-    }
+    if (activeOption) activeOption.classList.add('active-product');
 }
 
 function populateProductSelect(products) {
@@ -108,9 +102,7 @@ function populateProductSelect(products) {
 // --- CONFIGURACIÓN DE EVENT LISTENERS ---
 searchBox.addEventListener('input', (e) => {
     const searchTerm = e.target.value.toLowerCase();
-    const filteredProducts = allProducts.filter(product => 
-        product.name.toLowerCase().includes(searchTerm)
-    );
+    const filteredProducts = allProducts.filter(product => product.name.toLowerCase().includes(searchTerm));
     populateProductSelect(filteredProducts);
     highlightActiveProduct(productSelect.value);
 });
@@ -125,15 +117,22 @@ bgColorPicker.addEventListener('input', (e) => {
     scene.background.set(e.target.value);
 });
 
-// --- BUCLE DE ANIMACIÓN ---
+// NUEVO: Event listener para el slider de Bloom
+bloomSlider.addEventListener('input', (e) => {
+    // El valor del slider es un string, lo convertimos a número
+    const strength = parseFloat(e.target.value);
+    // Actualizamos la propiedad 'strength' del pase de bloom
+    bloomPass.strength = strength;
+});
+
+// --- BUCLE DE ANIMACIÓN (sin cambios) ---
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    // Renderiza la escena a través del composer para aplicar el efecto bloom
     composer.render();
 }
 
-// --- FUNCIÓN PRINCIPAL ASÍNCRONA ---
+// --- FUNCIÓN PRINCIPAL ASÍNCRONA (sin cambios) ---
 async function main() {
     try {
         const response = await fetch('models.json');
@@ -155,11 +154,10 @@ async function main() {
     }
 }
 
-// --- RESIZE Y INICIO ---
+// --- RESIZE Y INICIO (sin cambios) ---
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    // Actualiza tanto el renderer como el composer
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
