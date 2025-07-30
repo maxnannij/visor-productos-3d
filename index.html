@@ -9,21 +9,43 @@
 <body>
     <div id="info">
         <h1>Galería de Productos 3D</h1>
-        <p>Selecciona un producto y explóralo.</p>
+        <p>Usa los controles o el ratón para explorar el producto.</p>
     </div>
 
-    <!-- NUEVO: Contenedor para la lista de productos -->
+    <!-- Lista de productos (sin cambios) -->
     <div id="product-list"></div>
-
-    <!-- NUEVO: Superposición con spinner de carga -->
+    
+    <!-- Superposición de carga (sin cambios) -->
     <div id="loading-overlay">
         <div class="spinner"></div>
     </div>
 
-    <!-- El lienzo donde Three.js dibujará la escena -->
+    <!-- NUEVO: Panel de controles de la UI -->
+    <div id="ui-controls">
+        <div class="control-group">
+            <label>Mover Vertical</label>
+            <div class="button-group">
+                <button id="move-up">↑</button>
+                <button id="move-down">↓</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>Rotar Horizontal</label>
+            <div class="button-group">
+                <button id="rotate-left">⟲</button>
+                <button id="rotate-right">⟳</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="light-slider">Luz Ambiental</label>
+            <input type="range" id="light-slider" min="0" max="2" value="0.8" step="0.1">
+        </div>
+    </div>
+
+    <!-- Canvas (sin cambios) -->
     <canvas id="c"></canvas>
 
-    <!-- Importamos Three.js desde una CDN (sin cambios) -->
+    <!-- Scripts (sin cambios) -->
     <script type="importmap">
         {
             "imports": {
@@ -32,8 +54,6 @@
             }
         }
     </script>
-    
-    <!-- Nuestro script principal -->
     <script type="module" src="main.js"></script>
 </body>
 </html>
