@@ -1,4 +1,4 @@
-// Importaciones (sin cambios)
+// Importaciones para Three.js y efectos de post-procesamiento
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -54,7 +54,7 @@ composer.addPass(outputPass);
 const loadingManager = new THREE.LoadingManager(() => { loadingOverlay.style.display = 'none'; });
 const gltfLoader = new GLTFLoader(loadingManager);
 
-// --- FUNCIÓN DE DIAGNÓSTICO FORENSE ---
+// --- FUNCIONES DE LA APLICACIÓN ---
 function loadModel(fileName) {
     loadingOverlay.style.display = 'flex';
     if (currentModel) scene.remove(currentModel);
@@ -71,40 +71,29 @@ function loadModel(fileName) {
         currentModel.scale.set(scale, scale, scale);
         scene.add(currentModel);
 
-        console.log(`=============================================`);
-        console.log(`INICIANDO ANÁLISIS FORENSE DE: ${fileName}`);
-        console.log(`=============================================`);
-
+        // LÓGICA FINAL: Normaliza los materiales emisivos para prevenir sobreexposición.
         currentModel.traverse((child) => {
             if (child.isMesh && child.material) {
-                console.log(`-> Encontrada Malla: '${child.name || 'Sin Nombre'}'`);
-                
+                // Asegura que se manejen tanto materiales únicos como arrays de materiales
                 const materials = Array.isArray(child.material) ? child.material : [child.material];
 
-                materials.forEach((material, index) => {
-                    console.log(`  - Material[${index}]: '${material.name || 'Sin Nombre'}'`);
-                    
+                materials.forEach((material) => {
+                    // Solo actúa sobre materiales que tienen propiedades emisivas
                     if (material.emissive) {
-                        console.log(`    - Emissive Color ANTES: (R:${material.emissive.r}, G:${material.emissive.g}, B:${material.emissive.b})`);
-                        console.log(`    - Emissive Intensity ANTES: ${material.emissiveIntensity}`);
-
-                        // Forzamos la intensidad a 0 para la prueba
-                        material.emissiveIntensity = 0;
+                        // Establece una intensidad base segura.
+                        material.emissiveIntensity = 1.0;
                         
-                        console.log(`    - Emissive Intensity DESPUÉS: ${material.emissiveIntensity}`);
-                    } else {
-                        console.log(`    - Este material no tiene propiedades emisivas.`);
+                        // Si el color es HDR (componentes > 1), lo resetea a un blanco estándar.
+                        if (material.emissive.r > 1.0 || material.emissive.g > 1.0 || material.emissive.b > 1.0) {
+                            material.emissive.setRGB(1, 1, 1);
+                        }
                     }
                 });
             }
         });
-        console.log(`=============================================`);
-        console.log(`ANÁLISIS FINALIZADO`);
-        console.log(`=============================================`);
     });
 }
 
-// --- OTRAS FUNCIONES (sin cambios) ---
 function highlightActiveProduct(fileName) {
     Array.from(productSelect.options).forEach(option => option.classList.remove('active-product'));
     const activeOption = productSelect.querySelector(`option[value="${fileName}"]`);
