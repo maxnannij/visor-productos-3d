@@ -78,7 +78,7 @@ function loadModel(fileName) {
                 materials.forEach((material) => {
                     if (material.emissive && material.emissiveIntensity > 20.0) {
                         // Limita silenciosamente la intensidad a un valor seguro
-                        material.emissiveIntensity = 10.0;
+                        material.emissiveIntensity = 1.0;
                     }
                 });
             }
