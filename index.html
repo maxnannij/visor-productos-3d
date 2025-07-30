@@ -7,12 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Superposición de carga (sin cambios) -->
+    <!-- Superposición de carga -->
     <div id="loading-overlay"><div class="spinner"></div></div>
 
-    <!-- Panel de control principal (sin cambios) -->
+    <!-- Panel de control principal a la izquierda -->
     <div id="main-controls" class="panel">
-        <!-- ... contenido sin cambios ... -->
         <div class="panel-header">
             <h1>Galería de Productos</h1>
         </div>
@@ -30,25 +29,22 @@
         </div>
     </div>
 
-    <!-- Controles flotantes inferiores (sin cambios) -->
+    <!-- Controles flotantes inferiores -->
     <div id="floating-controls">
+        <div class="control-group">
+            <label for="bloom-slider">Brillo</label>
+            <input type="range" id="bloom-slider" min="0" max="3" value="0" step="0.1">
+        </div>
         <div class="control-group">
             <label for="bg-color-picker">Fondo</label>
             <input type="color" id="bg-color-picker" value="#545454">
         </div>
     </div>
 
-    <!-- NUEVO: Panel flotante derecho para el control de Bloom -->
-    <div id="bloom-controls" class="panel">
-        <div class="control-group">
-            <label for="bloom-slider">Intensidad Brillo</label>
-            <input type="range" id="bloom-slider" min="0" max="3" value="1.5" step="0.1">
-        </div>
-    </div>
-
-
-    <!-- Canvas y Scripts (sin cambios) -->
+    <!-- Canvas donde se dibuja la escena 3D -->
     <canvas id="c"></canvas>
+
+    <!-- Importación de Three.js y Scripts -->
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
     <script type="module" src="main.js"></script>
 </body>
