@@ -1,86 +1,130 @@
 // Importamos las librerías necesarias de Three.js
 import * as THREE from 'three';
-// OrbitControls permite mover la cámara con el ratón
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-// GLTFLoader permite cargar modelos en formato glTF/GLB
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// 1. ESCENA (Scene)
-// La escena es el contenedor de todos los objetos, luces y cámaras.
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf0f0f0); // Un color de fondo gris claro
+// --- CONFIGURACIÓN DE PRODUCTOS ---
+const products = [
+    {
+        name: '301176',
+        path: 'models/301176.glb'
+    },
+    {
+        name: '301169',
+        path: 'models/301169.glb'
+    },
+    // Añade más productos aquí
+];
 
-// 2. CÁMARA (Camera)
-// La cámara define qué parte de la escena es visible.
-// PerspectiveCamera(campo de visión, aspect ratio, near, far)
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 5; // Alejamos un poco la cámara
+// --- VARIABLES GLOBALES ---
+let currentModel;
 
-// 3. RENDERER (Renderer)
-// El renderer "dibuja" la escena en el canvas del HTML.
+// --- ELEMENTOS DEL DOM ---
 const canvas = document.querySelector('#c');
+const loadingOverlay = document.getElementById('loading-overlay');
+const productListDiv = document.getElementById('product-list');
+
+// 1. ESCENA
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f0f0);
+
+// 2. CÁMARA
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1.5, 6);
+
+// 3. RENDERER
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Mejor rendimiento en pantallas de alta densidad
 
-// 4. LUCES (Lights)
-// Sin luces, no veríamos el modelo.
-// Luz ambiental para iluminar todo de forma general
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+// 4. LUCES
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
-
-// Luz direccional para crear sombras y brillos (como el sol)
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-// 5. CONTROLES DE LA CÁMARA (OrbitControls)
-// Permite al usuario girar, hacer zoom y mover la cámara.
+// 5. CONTROLES
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Efecto de "arrastre" suave
-controls.dampingFactor = 0.05;
-controls.screenSpacePanning = false; // Limita el paneo
-controls.minDistance = 2; // Zoom mínimo
-controls.maxDistance = 10; // Zoom máximo
+controls.enableDamping = true;
+controls.target.set(0, 1, 0); // Apunta la cámara un poco más arriba
 
-// 6. CARGADOR DEL MODELO 3D (GLTFLoader)
-const loader = new GLTFLoader();
-loader.load(
-    'models/producto.glb', // Ruta a tu modelo 3D
-    function (gltf) {
-        // Esta función se ejecuta cuando el modelo se ha cargado correctamente
-        const model = gltf.scene;
-        // Opcional: Centrar el modelo y escalarlo si es necesario
-        const box = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        model.position.sub(center); // Centra el modelo en el origen
-        scene.add(model);
+// --- GESTOR DE CARGA (LOADING MANAGER) ---
+// El LoadingManager es clave para saber cuándo empieza y termina la carga.
+const loadingManager = new THREE.LoadingManager(
+    // Se llama cuando la carga se completa
+    () => {
+        loadingOverlay.style.display = 'none';
     },
-    undefined, // No necesitamos la función de progreso aquí
-    function (error) {
-        // Esta función se ejecuta si hay un error al cargar
-        console.error('Un error ocurrió al cargar el modelo:', error);
+    // Se llama durante el progreso de carga (opcional)
+    (itemUrl, itemsLoaded, itemsTotal) => {
+        const progressPercent = Math.round((itemsLoaded / itemsTotal) * 100);
+        console.log(`Cargando: ${progressPercent}%`);
+    },
+    // Se llama si hay un error
+    () => {
+        console.error('Hubo un error al cargar el modelo.');
+        loadingOverlay.style.display = 'none'; // Ocultar también en caso de error
     }
 );
 
-// 7. FUNCIÓN DE ANIMACIÓN (Animation Loop)
-// Este bucle se ejecuta en cada frame y actualiza la escena.
-function animate() {
-    requestAnimationFrame(animate); // Llama a animate() en el siguiente frame
+// 6. CARGADOR DEL MODELO 3D
+const gltfLoader = new GLTFLoader(loadingManager); // Usamos el gestor de carga
 
-    controls.update(); // Actualiza los controles de la cámara
+// --- FUNCIÓN PARA CARGAR MODELOS ---
+function loadModel(url) {
+    // Muestra el indicador de carga
+    loadingOverlay.style.display = 'flex';
 
-    renderer.render(scene, camera); // Renderiza la escena
+    // Si ya hay un modelo en la escena, lo eliminamos
+    if (currentModel) {
+        scene.remove(currentModel);
+    }
+
+    gltfLoader.load(url, (gltf) => {
+        currentModel = gltf.scene;
+
+        // Centrar y escalar el modelo (opcional pero recomendado)
+        const box = new THREE.Box3().setFromObject(currentModel);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 2.5 / maxDim; // Escala para que el modelo tenga un tamaño razonable
+        
+        currentModel.position.sub(center);
+        currentModel.scale.set(scale, scale, scale);
+
+        scene.add(currentModel);
+    });
 }
 
-// Iniciar el bucle de animación
+// --- CREACIÓN DINÁMICA DE BOTONES ---
+products.forEach(product => {
+    const button = document.createElement('button');
+    button.innerText = product.name;
+    button.addEventListener('click', () => {
+        loadModel(product.path);
+    });
+    productListDiv.appendChild(button);
+});
+
+// --- BUCLE DE ANIMACIÓN ---
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
 animate();
 
-// 8. MANEJO DEL CAMBIO DE TAMAÑO DE LA VENTANA
+// --- MANEJO DE REDIMENSIÓN DE VENTANA ---
 window.addEventListener('resize', () => {
-    // Actualizar el aspect ratio de la cámara
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
-    // Actualizar el tamaño del renderer
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
+
+// --- CARGA INICIAL DEL PRIMER PRODUCTO ---
+if (products.length > 0) {
+    loadModel(products[0].path);
+}
