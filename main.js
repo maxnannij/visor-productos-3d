@@ -1,4 +1,4 @@
-// Importaciones para Three.js y efectos de post-procesamiento
+// Importaciones (sin cambios)
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -71,13 +71,16 @@ function loadModel(fileName) {
         currentModel.scale.set(scale, scale, scale);
         scene.add(currentModel);
 
-        // Limita la intensidad emisiva de los materiales para evitar sobreexposición
+        // LÓGICA ROBUSTA FINAL: Limita la intensidad emisiva de los materiales
         currentModel.traverse((child) => {
-            if (child.isMesh && child.material && child.material.emissive) {
-                if (child.material.emissiveIntensity > 20.0) {
-                    console.warn(`Intensidad emisiva muy alta detectada en ${child.material.name}! Reduciendo de ${child.material.emissiveIntensity} a 10.`);
-                    child.material.emissiveIntensity = 10;
-                }
+            if (child.isMesh && child.material) {
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach((material) => {
+                    if (material.emissive && material.emissiveIntensity > 20.0) {
+                        // Limita silenciosamente la intensidad a un valor seguro
+                        material.emissiveIntensity = 10.0;
+                    }
+                });
             }
         });
     });
