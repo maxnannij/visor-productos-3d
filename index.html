@@ -10,42 +10,35 @@
     <!-- Superposición de carga (sin cambios) -->
     <div id="loading-overlay"><div class="spinner"></div></div>
 
-    <!-- NUEVO: Panel de control principal a la izquierda -->
-    <div id="main-controls">
+    <!-- Panel de control principal a la izquierda -->
+    <div id="main-controls" class="panel">
         <div class="panel-header">
             <h1>Galería de Productos</h1>
         </div>
         <div class="panel-content">
-            <div class="control-group">
-                <label for="search-box">Buscar Producto</label>
-                <input type="text" id="search-box" placeholder="Escribe para buscar...">
-            </div>
-            <div class="control-group">
-                <label for="product-select">Seleccionar Producto</label>
-                <select id="product-select"></select>
+            <!-- Contenedor para alinear buscador y selector -->
+            <div class="search-select-container">
+                <div class="control-group">
+                    <label for="search-box">Buscar</label>
+                    <input type="text" id="search-box" placeholder="Escribe para buscar...">
+                </div>
+                <div class="control-group">
+                    <label for="product-select">Producto</label>
+                    <select id="product-select"></select>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Panel de controles de la escena a la derecha (antes 'ui-controls') -->
-    <div id="scene-controls">
+    <!-- NUEVO: Contenedor flotante para controles de escena -->
+    <div id="floating-controls">
         <div class="control-group">
-            <label>Mover Vertical</label>
-            <div class="button-group">
-                <button id="move-up">↑</button>
-                <button id="move-down">↓</button>
-            </div>
-        </div>
-        <div class="control-group">
-            <label>Rotar Horizontal</label>
-            <div class="button-group">
-                <button id="rotate-left">⟲</button>
-                <button id="rotate-right">⟳</button>
-            </div>
-        </div>
-        <div class="control-group">
-            <label for="light-slider">Brillo Global</label>
+            <label for="light-slider">Brillo</label>
             <input type="range" id="light-slider" min="0.5" max="3" value="1" step="0.1">
+        </div>
+        <div class="control-group">
+            <label for="bg-color-picker">Fondo</label>
+            <input type="color" id="bg-color-picker" value="#f0f0f0">
         </div>
     </div>
 
