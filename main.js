@@ -75,7 +75,7 @@ function loadModel(fileName) {
         currentModel.traverse((child) => {
             if (child.isMesh && child.material.name === 'Nombre_Del_Material_Brillante') {
                 child.material.emissive = new THREE.Color(0xffffff); // Color del brillo
-                child.material.emissiveIntensity = 4; // Fuerza del brillo
+                child.material.emissiveIntensity = 1; // Fuerza del brillo
             }
         });
     });
