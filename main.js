@@ -54,7 +54,7 @@ composer.addPass(outputPass);
 const loadingManager = new THREE.LoadingManager(() => { loadingOverlay.style.display = 'none'; });
 const gltfLoader = new GLTFLoader(loadingManager);
 
-// --- FUNCIONES DE LA APLICACIÓN ---
+// --- FUNCIÓN DE DIAGNÓSTICO FORENSE ---
 function loadModel(fileName) {
     loadingOverlay.style.display = 'flex';
     if (currentModel) scene.remove(currentModel);
@@ -71,21 +71,40 @@ function loadModel(fileName) {
         currentModel.scale.set(scale, scale, scale);
         scene.add(currentModel);
 
-        // LÓGICA ROBUSTA FINAL: Limita la intensidad emisiva de los materiales
+        console.log(`=============================================`);
+        console.log(`INICIANDO ANÁLISIS FORENSE DE: ${fileName}`);
+        console.log(`=============================================`);
+
         currentModel.traverse((child) => {
             if (child.isMesh && child.material) {
+                console.log(`-> Encontrada Malla: '${child.name || 'Sin Nombre'}'`);
+                
                 const materials = Array.isArray(child.material) ? child.material : [child.material];
-                materials.forEach((material) => {
-                    if (material.emissive && material.emissiveIntensity > 20.0) {
-                        // Limita silenciosamente la intensidad a un valor seguro
-                        material.emissiveIntensity = 1.0;
+
+                materials.forEach((material, index) => {
+                    console.log(`  - Material[${index}]: '${material.name || 'Sin Nombre'}'`);
+                    
+                    if (material.emissive) {
+                        console.log(`    - Emissive Color ANTES: (R:${material.emissive.r}, G:${material.emissive.g}, B:${material.emissive.b})`);
+                        console.log(`    - Emissive Intensity ANTES: ${material.emissiveIntensity}`);
+
+                        // Forzamos la intensidad a 0 para la prueba
+                        material.emissiveIntensity = 0;
+                        
+                        console.log(`    - Emissive Intensity DESPUÉS: ${material.emissiveIntensity}`);
+                    } else {
+                        console.log(`    - Este material no tiene propiedades emisivas.`);
                     }
                 });
             }
         });
+        console.log(`=============================================`);
+        console.log(`ANÁLISIS FINALIZADO`);
+        console.log(`=============================================`);
     });
 }
 
+// --- OTRAS FUNCIONES (sin cambios) ---
 function highlightActiveProduct(fileName) {
     Array.from(productSelect.options).forEach(option => option.classList.remove('active-product'));
     const activeOption = productSelect.querySelector(`option[value="${fileName}"]`);
