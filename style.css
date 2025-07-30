@@ -142,19 +142,29 @@
     align-items: center;
 }
 
-/* NUEVO: Estilo para el panel de control de Bloom */
+/* MODIFICADO: Estilo para el panel de control de Bloom, ahora más estrecho */
 #bloom-controls {
     top: 50%;
     right: 20px;
     transform: translateY(-50%);
-    width: 200px;
+    width: 80px; /* Reducimos el ancho significativamente */
+    padding: 20px 10px; /* Ajustamos el padding */
 }
 
 #bloom-controls .control-group {
     align-items: center; /* Centra la etiqueta y el slider */
+    gap: 15px; /* Aumentamos el espacio entre la etiqueta y el slider */
 }
 
+/* NUEVO Y CLAVE: Estilos para hacer el slider vertical */
 #bloom-slider {
-    width: 100%;
+    width: 150px; /* El ancho ahora controla la "altura" del slider vertical en algunos navegadores */
+    height: 20px; /* La altura ahora controla el "ancho" */
+    
+    /* La magia para la mayoría de los navegadores (Chrome, Edge, Safari) */
+    -webkit-appearance: slider-vertical;
+    writing-mode: bt-lr; /* Fallback para algunos sistemas */
+
+    /* Puedes quitar esto si no te gusta el cursor, pero es útil */
     cursor: pointer;
 }
