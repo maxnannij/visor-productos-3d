@@ -158,8 +158,8 @@
 
 /* NUEVO Y CLAVE: Estilos para hacer el slider vertical */
 #bloom-slider {
-    width: 20px; /* El ancho ahora controla la "altura" del slider vertical en algunos navegadores */
-    height: 150px; /* La altura ahora controla el "ancho" */
+    width: 150px; /* El ancho ahora controla la "altura" del slider vertical en algunos navegadores */
+    height: 20px; /* La altura ahora controla el "ancho" */
     
     /* La magia para la mayoría de los navegadores (Chrome, Edge, Safari) */
     -webkit-appearance: slider-vertical;
