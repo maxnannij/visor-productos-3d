@@ -7,21 +7,28 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="info">
-        <h1>Galería de Productos 3D</h1>
-        <p>Usa los controles o el ratón para explorar el producto.</p>
-    </div>
-
-    <!-- Lista de productos (sin cambios) -->
-    <div id="product-list"></div>
-    
     <!-- Superposición de carga (sin cambios) -->
-    <div id="loading-overlay">
-        <div class="spinner"></div>
+    <div id="loading-overlay"><div class="spinner"></div></div>
+
+    <!-- NUEVO: Panel de control principal a la izquierda -->
+    <div id="main-controls">
+        <div class="panel-header">
+            <h1>Galería de Productos</h1>
+        </div>
+        <div class="panel-content">
+            <div class="control-group">
+                <label for="search-box">Buscar Producto</label>
+                <input type="text" id="search-box" placeholder="Escribe para buscar...">
+            </div>
+            <div class="control-group">
+                <label for="product-select">Seleccionar Producto</label>
+                <select id="product-select"></select>
+            </div>
+        </div>
     </div>
 
-    <!-- NUEVO: Panel de controles de la UI -->
-    <div id="ui-controls">
+    <!-- Panel de controles de la escena a la derecha (antes 'ui-controls') -->
+    <div id="scene-controls">
         <div class="control-group">
             <label>Mover Vertical</label>
             <div class="button-group">
@@ -37,23 +44,14 @@
             </div>
         </div>
         <div class="control-group">
-            <label for="light-slider">Luz Ambiental</label>
-            <input type="range" id="light-slider" min="0" max="2" value="0.8" step="0.1">
+            <label for="light-slider">Brillo Global</label>
+            <input type="range" id="light-slider" min="0.5" max="3" value="1" step="0.1">
         </div>
     </div>
 
-    <!-- Canvas (sin cambios) -->
+    <!-- Canvas y Scripts (sin cambios) -->
     <canvas id="c"></canvas>
-
-    <!-- Scripts (sin cambios) -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
     <script type="module" src="main.js"></script>
 </body>
 </html>
