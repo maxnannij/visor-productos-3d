@@ -1,25 +1,48 @@
-/* ... (todos los estilos anteriores sin cambios) ... */
+/* ... (Estilos de body, #c, loading-overlay sin cambios) ... */
 
-/* --- NUEVOS ESTILOS PARA LA UI DE CONTROLES --- */
-
-#ui-controls {
+/* Estilo para los paneles de control */
+.panel {
     position: absolute;
     top: 20px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.85);
     padding: 15px;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Espacio entre grupos de controles */
+    gap: 15px;
+    backdrop-filter: blur(5px);
+}
+
+#main-controls {
+    left: 20px;
+    width: 280px;
+}
+
+#scene-controls {
+    right: 20px;
     width: 200px;
 }
 
+.panel-header h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Estilos de los grupos de control (ligeramente ajustados) */
 .control-group {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Espacio entre la etiqueta y el control */
+    gap: 8px;
 }
 
 .control-group label {
@@ -28,13 +51,27 @@
     color: #555;
 }
 
-.button-group {
-    display: flex;
-    justify-content: space-between; /* Espacia los botones */
+/* Estilos para buscador y selector */
+#search-box, #product-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
 }
 
-#ui-controls button {
-    width: 48%; /* Casi la mitad para que quepan dos por fila */
+#product-select {
+    cursor: pointer;
+}
+
+/* Estilos de botones y slider (heredados de la versión anterior) */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+}
+#scene-controls button {
+    width: 48%;
     padding: 10px;
     font-size: 20px;
     border: 1px solid #ccc;
@@ -43,17 +80,6 @@
     border-radius: 5px;
     transition: background-color 0.2s, transform 0.1s;
 }
-
-#ui-controls button:hover {
-    background-color: #e0e0e0;
-}
-
-#ui-controls button:active {
-    background-color: #ccc;
-    transform: scale(0.95);
-}
-
-#light-slider {
-    width: 100%;
-    cursor: pointer;
-}
+#scene-controls button:hover { background-color: #e0e0e0; }
+#scene-controls button:active { background-color: #ccc; transform: scale(0.95); }
+#light-slider { width: 100%; cursor: pointer; }
