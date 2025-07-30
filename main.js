@@ -66,15 +66,15 @@ const gltfLoader = new GLTFLoader(loadingManager);
 // Para que el bloom funcione, un material debe tener un color "emisivo"
 // con una intensidad superior al `threshold` del bloomPass.
 // Vamos a añadir un cubo de ejemplo para demostrarlo.
-const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const glowingMaterial = new THREE.MeshStandardMaterial({
-    emissive: 0xffffee, // El color de la luz que emite
-    emissiveIntensity: 2, // La intensidad. ¡Este valor debe superar el threshold!
-    color: 0x000000 // El color base puede ser oscuro
-});
-const glowingCube = new THREE.Mesh(geometry, glowingMaterial);
-glowingCube.position.set(2, 1, 0); // Lo ponemos a un lado para verlo
-scene.add(glowingCube);
+// const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+//const glowingMaterial = new THREE.MeshStandardMaterial({
+//    emissive: 0xffffee, // El color de la luz que emite
+//    emissiveIntensity: 2, // La intensidad. ¡Este valor debe superar el threshold!
+//    color: 0x000000 // El color base puede ser oscuro
+// });
+// const glowingCube = new THREE.Mesh(geometry, glowingMaterial);
+// glowingCube.position.set(2, 1, 0); // Lo ponemos a un lado para verlo
+// scene.add(glowingCube);
 
 
 // --- FUNCIONES DE LA APLICACIÓN (con una modificación en loadModel) ---
