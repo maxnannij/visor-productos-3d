@@ -10,13 +10,12 @@
     <!-- Superposición de carga (sin cambios) -->
     <div id="loading-overlay"><div class="spinner"></div></div>
 
-    <!-- Panel de control principal a la izquierda -->
+    <!-- Panel de control principal (sin cambios) -->
     <div id="main-controls" class="panel">
         <div class="panel-header">
             <h1>Galería de Productos</h1>
         </div>
         <div class="panel-content">
-            <!-- Contenedor para alinear buscador y selector -->
             <div class="search-select-container">
                 <div class="control-group">
                     <label for="search-box">Buscar</label>
@@ -30,12 +29,9 @@
         </div>
     </div>
 
-    <!-- NUEVO: Contenedor flotante para controles de escena -->
+    <!-- Contenedor flotante para controles de escena (MODIFICADO) -->
     <div id="floating-controls">
-        <div class="control-group">
-            <label for="light-slider">Brillo</label>
-            <input type="range" id="light-slider" min="0.5" max="3" value="1" step="0.1">
-        </div>
+        <!-- Eliminamos el grupo del slider de brillo -->
         <div class="control-group">
             <label for="bg-color-picker">Fondo</label>
             <input type="color" id="bg-color-picker" value="#f0f0f0">
