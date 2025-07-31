@@ -9,7 +9,7 @@
 <body>
     <div id="loading-overlay"><div class="spinner"></div></div>
 
-    <!-- Panel de selección de productos (sin cambios) -->
+    <!-- Panel de selección de productos -->
     <div id="main-controls" class="panel">
         <div class="panel-header"><h1>Galería de Productos</h1></div>
         <div class="panel-content">
@@ -26,12 +26,24 @@
         </div>
     </div>
     
-    <!-- NUEVO: Panel de instrucciones -->
+    <!-- Panel de instrucciones para la manipulación -->
     <div id="instructions" class="panel">
-        <p>Haz clic en una pieza para seleccionarla y moverla. Haz clic en el fondo para deseleccionar.</p>
+        <p>Haz clic en una pieza para seleccionarla. Haz clic en el fondo para deseleccionar.</p>
     </div>
 
-    <!-- Canvas y Scripts (sin cambios) -->
+    <!-- RESTAURADO: Panel de controles inferior con Bloom y Fondo -->
+    <div id="floating-controls">
+        <div class="control-group">
+            <label for="bloom-slider">Intensidad</label>
+            <input type="range" id="bloom-slider" min="0" max="3" value="0" step="0.1">
+        </div>
+        <div class="control-group">
+            <label for="bg-color-picker">Fondo</label>
+            <input type="color" id="bg-color-picker" value="#545454">
+        </div>
+    </div>
+
+    <!-- Canvas y Scripts -->
     <canvas id="c"></canvas>
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
     <script type="module" src="main.js"></script>
