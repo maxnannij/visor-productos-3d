@@ -1,16 +1,20 @@
-// Importaciones (con TransformControls)
+// Importaciones (con TransformControls y Post-procesamiento)
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 // --- VARIABLES GLOBALES ---
 let currentModel;
 let allProducts = [];
-let raycaster, mouse, transformControls;
+let raycaster, mouse, transformControls, orbitControls, composer;
 let movableObjects = [];
 let selectedObject = null;
-const highlightMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+const highlightMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true, opacity: 0.7 });
 let originalMaterials = new Map();
 
 // --- ELEMENTOS DEL DOM ---
@@ -18,6 +22,8 @@ const canvas = document.querySelector('#c');
 const loadingOverlay = document.getElementById('loading-overlay');
 const searchBox = document.getElementById('search-box');
 const productSelect = document.getElementById('product-select');
+const bgColorPicker = document.getElementById('bg-color-picker');
+const bloomSlider = document.getElementById('bloom-slider');
 
 // --- INICIALIZACIÓN DE THREE.JS ---
 const scene = new THREE.Scene();
@@ -27,6 +33,7 @@ camera.position.set(0, 1.5, 6);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // Mejor tone mapping para bloom
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight);
@@ -34,8 +41,17 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 2.0);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-const orbitControls = new OrbitControls(camera, renderer.domElement);
+orbitControls = new OrbitControls(camera, renderer.domElement);
 orbitControls.enableDamping = true;
+
+// --- INICIALIZACIÓN DE POST-PROCESAMIENTO ---
+const renderScene = new RenderPass(scene, camera);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0, 0.4, 0.85);
+const outputPass = new OutputPass();
+composer = new EffectComposer(renderer);
+composer.addPass(renderScene);
+composer.addPass(bloomPass);
+composer.addPass(outputPass);
 
 // --- INICIALIZACIÓN DE INTERACCIÓN ---
 raycaster = new THREE.Raycaster();
@@ -48,29 +64,14 @@ transformControls.addEventListener('dragging-changed', (event) => {
 scene.add(transformControls);
 
 
-// --- GESTOR DE CARGA Y CARGADOR ---
-// DIAGNÓSTICO: Modificamos el LoadingManager para que sea más explícito
-const loadingManager = new THREE.LoadingManager(
-    // onLoad: Se llama cuando todas las cargas pendientes han terminado.
-    () => {
-        console.log("LoadingManager: ¡Carga completada! Ocultando overlay.");
-        loadingOverlay.style.display = 'none';
-    },
-    // onProgress: Se llama con cada item cargado.
-    (url, itemsLoaded, itemsTotal) => {
-        console.log(`LoadingManager: Cargando archivo: ${url} (${itemsLoaded}/${itemsTotal})`);
-    },
-    // onError: Se llama si un loader falla.
-    (url) => {
-        console.error(`LoadingManager: Error cargando el archivo ${url}. Ocultando overlay.`);
-        loadingOverlay.style.display = 'none';
-    }
-);
-const gltfLoader = new GLTFLoader(loadingManager); // El loader ahora usa nuestro manager detallado
+// --- GESTOR DE CARGA ---
+const loadingManager = new THREE.LoadingManager(() => {
+    loadingOverlay.style.display = 'none';
+});
+const gltfLoader = new GLTFLoader(loadingManager);
 
 // --- FUNCIONES DE LA APLICACIÓN ---
 function loadModel(fileName) {
-    // La pantalla de carga ya la maneja el LoadingManager, así que no la mostramos aquí.
     if (currentModel) scene.remove(currentModel);
     if (transformControls.object) transformControls.detach();
     movableObjects = [];
@@ -84,7 +85,6 @@ function loadModel(fileName) {
 
         currentModel.traverse((child) => {
             if (child.isMesh && child.userData.isMovable) {
-                console.log(`Parte móvil encontrada: ${child.name}`);
                 movableObjects.push(child);
             }
         });
@@ -96,37 +96,33 @@ function onPointerMove(event) {
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function onClick() {
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(movableObjects, true);
+function onClick(event) {
+    // Evita que el raycaster se dispare si se hace clic en un control de la UI
+    if (event.target.closest('.panel, #floating-controls')) return;
 
-    if (intersects.length === 0 || (selectedObject && intersects[0].object === selectedObject)) {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(movableObjects, false);
+
+    if (intersects.length > 0) {
+        const newSelectedObject = intersects[0].object;
+        if (selectedObject !== newSelectedObject) {
+             if (selectedObject) {
+                selectedObject.material = originalMaterials.get(selectedObject);
+                originalMaterials.delete(selectedObject);
+            }
+            selectedObject = newSelectedObject;
+            originalMaterials.set(selectedObject, selectedObject.material);
+            selectedObject.material = highlightMaterial;
+            transformControls.attach(selectedObject);
+        }
+    } else {
         if (selectedObject) {
             selectedObject.material = originalMaterials.get(selectedObject);
             originalMaterials.delete(selectedObject);
         }
         transformControls.detach();
         selectedObject = null;
-        return;
     }
-
-    if (selectedObject) {
-        selectedObject.material = originalMaterials.get(selectedObject);
-        originalMaterials.delete(selectedObject);
-    }
-    
-    selectedObject = intersects[0].object;
-    
-    originalMaterials.set(selectedObject, selectedObject.material);
-    selectedObject.material = highlightMaterial;
-    
-    transformControls.attach(selectedObject);
-    const move = selectedObject.userData.moveAxis || "";
-    const rotate = selectedObject.userData.rotateAxis || "";
-    transformControls.showX = move.includes("x") || rotate.includes("x");
-    transformControls.showY = move.includes("y") || rotate.includes("y");
-    transformControls.showZ = move.includes("z") || rotate.includes("z");
-    transformControls.setMode(rotate ? "rotate" : "translate");
 }
 
 function highlightActiveProduct(fileName) {
@@ -152,41 +148,37 @@ function populateProductSelect(products) {
 // --- CONFIGURACIÓN DE EVENT LISTENERS ---
 searchBox.addEventListener('input', (e) => { const searchTerm = e.target.value.toLowerCase(); const filteredProducts = allProducts.filter(product => product.name.toLowerCase().includes(searchTerm)); populateProductSelect(filteredProducts); highlightActiveProduct(productSelect.value); });
 productSelect.addEventListener('change', (e) => { const selectedFile = e.target.value; loadModel(selectedFile); highlightActiveProduct(selectedFile); });
-window.addEventListener('pointermove', onPointerMove);
-window.addEventListener('click', onClick);
+bgColorPicker.addEventListener('input', (e) => { scene.background.set(e.target.value); });
+bloomSlider.addEventListener('input', (e) => { bloomPass.strength = parseFloat(e.target.value); });
+window.addEventListener('pointermove', onPointerMove, false);
+window.addEventListener('click', onClick, false);
 
 // --- BUCLE DE ANIMACIÓN ---
 function animate() {
     requestAnimationFrame(animate);
     orbitControls.update();
-    renderer.render(scene, camera);
+    // Ahora renderizamos con el composer para aplicar los efectos
+    composer.render();
 }
 
 // --- FUNCIÓN PRINCIPAL ASÍNCRONA ---
 async function main() {
-    console.log("DIAGNÓSTICO: Iniciando main()...");
     try {
         const response = await fetch('models.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         allProducts = await response.json();
-        console.log("DIAGNÓSTICO: models.json cargado con éxito. Productos:", allProducts.length);
         populateProductSelect(allProducts);
 
         if (allProducts.length > 0) {
-            console.log("DIAGNÓSTICO: Hay productos en la lista. Cargando el primero.");
             const firstProductFile = allProducts[0].file;
             productSelect.value = firstProductFile;
             loadModel(firstProductFile);
             highlightActiveProduct(firstProductFile);
         } else {
-            // DIAGNÓSTICO: Si no hay productos, no hay nada que cargar.
-            // El LoadingManager no se activará, así que debemos ocultar la pantalla de carga manualmente.
-            console.warn("DIAGNÓSTICO: No hay productos en models.json. Ocultando overlay manualmente.");
             loadingOverlay.style.display = 'none';
         }
     } catch (error) {
-        console.error("DIAGNÓSTICO: Error fatal en la función main:", error);
-        // DIAGNÓSTICO: Si hay un error al leer el JSON, también debemos ocultar el overlay.
+        console.error("Error en la función main:", error);
         loadingOverlay.style.display = 'none';
     }
 }
@@ -196,6 +188,7 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
