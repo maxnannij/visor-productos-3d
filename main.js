@@ -33,7 +33,7 @@ camera.position.set(0, 1.5, 6);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.toneMapping = THREE.ACESFilmicToneMapping; // Mejor tone mapping para bloom
+renderer.toneMapping = THREE.ACESFilmicToneMapping; 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight);
@@ -83,11 +83,19 @@ function loadModel(fileName) {
         currentModel.position.sub(center);
         scene.add(currentModel);
 
+        console.log(`--- Buscando partes móviles en ${fileName} ---`);
         currentModel.traverse((child) => {
-            if (child.isMesh && child.userData.isMovable) {
+            // DIAGNÓSTICO: Imprime las propiedades personalizadas de CADA malla
+            if (child.isMesh) {
+                console.log(`Malla encontrada: '${child.name}'. userData:`, child.userData);
+            }
+            // Comprobación real
+            if (child.isMesh && child.userData.isMovable === true) {
+                console.log(`¡ÉXITO! Parte móvil encontrada y añadida: ${child.name}`);
                 movableObjects.push(child);
             }
         });
+        console.log(`--- Búsqueda finalizada. Total de partes móviles: ${movableObjects.length} ---`, movableObjects);
     });
 }
 
@@ -97,14 +105,24 @@ function onPointerMove(event) {
 }
 
 function onClick(event) {
-    // Evita que el raycaster se dispare si se hace clic en un control de la UI
-    if (event.target.closest('.panel, #floating-controls')) return;
+    console.log("DIAGNÓSTICO: Click detectado."); // PASO 1
+
+    if (event.target.closest('.panel, #floating-controls')) {
+        console.log("DIAGNÓSTICO: Click en la UI, ignorando.");
+        return;
+    }
 
     raycaster.setFromCamera(mouse, camera);
+    // DIAGNÓSTICO: Comprueba con qué está intentando intersectar el rayo
+    console.log(`DIAGNÓSTICO: Raycaster va a comprobar contra ${movableObjects.length} objeto(s).`); // PASO 2
+
     const intersects = raycaster.intersectObjects(movableObjects, false);
+
+    console.log(`DIAGNÓSTICO: Raycaster ha encontrado ${intersects.length} intersecciones.`); // PASO 3
 
     if (intersects.length > 0) {
         const newSelectedObject = intersects[0].object;
+        console.log("DIAGNÓSTICO: Objeto intersectado:", newSelectedObject.name);
         if (selectedObject !== newSelectedObject) {
              if (selectedObject) {
                 selectedObject.material = originalMaterials.get(selectedObject);
@@ -114,9 +132,11 @@ function onClick(event) {
             originalMaterials.set(selectedObject, selectedObject.material);
             selectedObject.material = highlightMaterial;
             transformControls.attach(selectedObject);
+            console.log("DIAGNÓSTICO: Gizmo adjuntado al objeto.");
         }
     } else {
         if (selectedObject) {
+            console.log("DIAGNÓSTICO: Deseleccionando objeto.");
             selectedObject.material = originalMaterials.get(selectedObject);
             originalMaterials.delete(selectedObject);
         }
@@ -125,72 +145,17 @@ function onClick(event) {
     }
 }
 
-function highlightActiveProduct(fileName) {
-    Array.from(productSelect.options).forEach(option => option.classList.remove('active-product'));
-    const activeOption = productSelect.querySelector(`option[value="${fileName}"]`);
-    if (activeOption) activeOption.classList.add('active-product');
-}
-
-function populateProductSelect(products) {
-    const currentSelectedValue = productSelect.value;
-    productSelect.innerHTML = '';
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.file;
-        option.textContent = product.name;
-        productSelect.appendChild(option);
-    });
-    if (productSelect.querySelector(`option[value="${currentSelectedValue}"]`)) {
-        productSelect.value = currentSelectedValue;
-    }
-}
-
-// --- CONFIGURACIÓN DE EVENT LISTENERS ---
+// ... (El resto de funciones, listeners, main, etc., no necesitan cambios y pueden quedarse como en el último código completo que te di)
+function highlightActiveProduct(fileName) { Array.from(productSelect.options).forEach(option => option.classList.remove('active-product')); const activeOption = productSelect.querySelector(`option[value="${fileName}"]`); if (activeOption) activeOption.classList.add('active-product'); }
+function populateProductSelect(products) { const currentSelectedValue = productSelect.value; productSelect.innerHTML = ''; products.forEach(product => { const option = document.createElement('option'); option.value = product.file; option.textContent = product.name; productSelect.appendChild(option); }); if (productSelect.querySelector(`option[value="${currentSelectedValue}"]`)) { productSelect.value = currentSelectedValue; } }
 searchBox.addEventListener('input', (e) => { const searchTerm = e.target.value.toLowerCase(); const filteredProducts = allProducts.filter(product => product.name.toLowerCase().includes(searchTerm)); populateProductSelect(filteredProducts); highlightActiveProduct(productSelect.value); });
 productSelect.addEventListener('change', (e) => { const selectedFile = e.target.value; loadModel(selectedFile); highlightActiveProduct(selectedFile); });
 bgColorPicker.addEventListener('input', (e) => { scene.background.set(e.target.value); });
 bloomSlider.addEventListener('input', (e) => { bloomPass.strength = parseFloat(e.target.value); });
 window.addEventListener('pointermove', onPointerMove, false);
 window.addEventListener('click', onClick, false);
-
-// --- BUCLE DE ANIMACIÓN ---
-function animate() {
-    requestAnimationFrame(animate);
-    orbitControls.update();
-    // Ahora renderizamos con el composer para aplicar los efectos
-    composer.render();
-}
-
-// --- FUNCIÓN PRINCIPAL ASÍNCRONA ---
-async function main() {
-    try {
-        const response = await fetch('models.json');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        allProducts = await response.json();
-        populateProductSelect(allProducts);
-
-        if (allProducts.length > 0) {
-            const firstProductFile = allProducts[0].file;
-            productSelect.value = firstProductFile;
-            loadModel(firstProductFile);
-            highlightActiveProduct(firstProductFile);
-        } else {
-            loadingOverlay.style.display = 'none';
-        }
-    } catch (error) {
-        console.error("Error en la función main:", error);
-        loadingOverlay.style.display = 'none';
-    }
-}
-
-// --- RESIZE Y INICIO ---
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
-
+function animate() { requestAnimationFrame(animate); orbitControls.update(); composer.render(); }
+async function main() { try { const response = await fetch('models.json'); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); allProducts = await response.json(); populateProductSelect(allProducts); if (allProducts.length > 0) { const firstProductFile = allProducts[0].file; productSelect.value = firstProductFile; loadModel(firstProductFile); highlightActiveProduct(firstProductFile); } else { loadingOverlay.style.display = 'none'; } } catch (error) { console.error("Error en la función main:", error); loadingOverlay.style.display = 'none'; } }
+window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); });
 main();
 animate();
