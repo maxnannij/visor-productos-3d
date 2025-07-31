@@ -74,25 +74,13 @@ body {
     text-align: center;
 }
 
-/* Panel de instrucciones */
-#instructions {
-    bottom: 90px; /* Lo subimos para que no choque con los controles */
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 8px 15px;
-    font-size: 14px;
-    text-align: center;
-}
-
-/* Panel flotante inferior */
-#floating-controls {
+/* Panel de control de animación (reemplaza a floating-controls) */
+#animation-controls {
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    gap: 30px;
-    align-items: center;
     padding: 10px 20px;
+    display: none; /* Oculto por defecto, se mostrará con JS si el modelo tiene animación */
 }
 
 /* =================================
@@ -140,29 +128,9 @@ body {
     font-weight: bold;
 }
 
-#bloom-slider {
-    width: 150px;
+#animation-controls input[type="range"] {
+    width: 250px;
     cursor: pointer;
-}
-
-#bg-color-picker {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 35px;
-    height: 35px;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-#bg-color-picker::-webkit-color-swatch {
-    border-radius: 50%;
-    border: 2px solid #ccc;
-}
-#bg-color-picker::-moz-color-swatch {
-    border-radius: 50%;
-    border: 2px solid #ccc;
 }
 
 /* =================================
