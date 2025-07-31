@@ -162,3 +162,32 @@ body {
     display: block;
     z-index: -1;
 }
+/* NUEVO: Estilos para el panel de control de los aros */
+#ring-controls {
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 220px;
+}
+
+#ring-controls .panel-header h3 {
+    margin: 0;
+    text-align: center;
+}
+
+#ring-controls .panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.ring-group {
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+#ring-controls input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
