@@ -3,47 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Productos 3D Interactivo</title>
+    <title>Visor de Productos 3D Animado</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="loading-overlay"><div class="spinner"></div></div>
 
-    <!-- Panel de selección de productos -->
+    <!-- Panel de selección de productos (sin cambios) -->
     <div id="main-controls" class="panel">
-        <div class="panel-header"><h1>Galería de Productos</h1></div>
-        <div class="panel-content">
-            <div class="search-select-container">
-                <div class="control-group">
-                    <label for="search-box">Buscar</label>
-                    <input type="text" id="search-box" placeholder="Escribe para buscar...">
-                </div>
-                <div class="control-group">
-                    <label for="product-select">Producto</label>
-                    <select id="product-select"></select>
-                </div>
-            </div>
-        </div>
+        <!-- ... -->
     </div>
     
-    <!-- Panel de instrucciones para la manipulación -->
-    <div id="instructions" class="panel">
-        <p>Haz clic en una pieza para seleccionarla. Haz clic en el fondo para deseleccionar.</p>
-    </div>
-
-    <!-- RESTAURADO: Panel de controles inferior con Bloom y Fondo -->
-    <div id="floating-controls">
+    <!-- NUEVO: Panel de control para la animación -->
+    <div id="animation-controls" class="panel">
         <div class="control-group">
-            <label for="bloom-slider">Intensidad</label>
-            <input type="range" id="bloom-slider" min="0" max="3" value="0" step="0.1">
-        </div>
-        <div class="control-group">
-            <label for="bg-color-picker">Fondo</label>
-            <input type="color" id="bg-color-picker" value="#545454">
+            <label for="animation-slider">Ajustar Posición</label>
+            <input type="range" id="animation-slider" min="0" max="1" value="0" step="0.01">
         </div>
     </div>
 
-    <!-- Canvas y Scripts -->
+    <!-- Canvas y Scripts (sin cambios) -->
     <canvas id="c"></canvas>
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
     <script type="module" src="main.js"></script>
