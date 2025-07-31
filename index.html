@@ -7,14 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- Superposición de carga inicial -->
     <div id="loading-overlay"><div class="spinner"></div></div>
 
-    <!-- Panel de selección de productos (sin cambios) -->
+    <!-- Panel de control principal para la selección de productos -->
     <div id="main-controls" class="panel">
-        <!-- ... -->
+        <div class="panel-header">
+            <h1>Galería de Productos</h1>
+        </div>
+        <div class="panel-content">
+            <div class="search-select-container">
+                <div class="control-group">
+                    <label for="search-box">Buscar</label>
+                    <input type="text" id="search-box" placeholder="Escribe para buscar...">
+                </div>
+                <div class="control-group">
+                    <label for="product-select">Producto</label>
+                    <select id="product-select"></select>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <!-- NUEVO: Panel de control para la animación -->
+    <!-- Panel de control para la animación del producto -->
     <div id="animation-controls" class="panel">
         <div class="control-group">
             <label for="animation-slider">Ajustar Posición</label>
@@ -22,9 +38,19 @@
         </div>
     </div>
 
-    <!-- Canvas y Scripts (sin cambios) -->
+    <!-- El canvas donde se renderiza la escena 3D -->
     <canvas id="c"></canvas>
-    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
+
+    <!-- Importación de Three.js y nuestro script principal -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
     <script type="module" src="main.js"></script>
+
 </body>
 </html>
