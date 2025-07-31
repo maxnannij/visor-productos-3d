@@ -7,29 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Superposición de carga -->
+    <!-- ... (loading-overlay y main-controls sin cambios) ... -->
     <div id="loading-overlay"><div class="spinner"></div></div>
-
-    <!-- Panel de control principal a la izquierda -->
     <div id="main-controls" class="panel">
-        <div class="panel-header">
-            <h1>Galería de Productos</h1>
-        </div>
-        <div class="panel-content">
-            <div class="search-select-container">
-                <div class="control-group">
-                    <label for="search-box">Buscar</label>
-                    <input type="text" id="search-box" placeholder="Escribe para buscar...">
-                </div>
-                <div class="control-group">
-                    <label for="product-select">Producto</label>
-                    <select id="product-select"></select>
-                </div>
-            </div>
-        </div>
+        <!-- ... -->
     </div>
 
-    <!-- Controles flotantes inferiores -->
+    <!-- Controles flotantes inferiores (sin cambios) -->
     <div id="floating-controls">
         <div class="control-group">
             <label for="bloom-slider">Brillo</label>
@@ -41,10 +25,32 @@
         </div>
     </div>
 
-    <!-- Canvas donde se dibuja la escena 3D -->
-    <canvas id="c"></canvas>
+    <!-- NUEVO: Panel de control para los aros -->
+    <div id="ring-controls" class="panel">
+        <div class="panel-header">
+            <h3>Ajustar Aros</h3>
+        </div>
+        <div class="panel-content">
+            <!-- Controles para el Anillo 1 -->
+            <div class="control-group ring-group">
+                <label for="ring1-height">Altura Anillo 1</label>
+                <input type="range" id="ring1-height" min="-0.5" max="0.5" value="0" step="0.01">
+                <label for="ring1-rotation">Rotación Anillo 1</label>
+                <input type="range" id="ring1-rotation" min="-180" max="180" value="0" step="1">
+            </div>
+            <!-- Controles para el Anillo 2 -->
+            <div class="control-group ring-group">
+                <label for="ring2-height">Altura Anillo 2</label>
+                <input type="range" id="ring2-height" min="-0.5" max="0.5" value="0" step="0.01">
+                <label for="ring2-rotation">Rotación Anillo 2</label>
+                <input type="range" id="ring2-rotation" min="-180" max="180" value="0" step="1">
+            </div>
+        </div>
+    </div>
 
-    <!-- Importación de Three.js y Scripts -->
+
+    <!-- Canvas y Scripts (sin cambios) -->
+    <canvas id="c"></canvas>
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
     <script type="module" src="main.js"></script>
 </body>
