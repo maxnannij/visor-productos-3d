@@ -1,16 +1,20 @@
-// Importaciones (ya no necesitamos TransformControls)
+// Importaciones
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-// (Las importaciones de post-procesamiento pueden quedarse si sigues usando bloom)
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 // --- VARIABLES GLOBALES ---
 let currentModel;
 let allProducts = [];
-let orbitControls;
-// NUEVO: Variables para la animación
+let orbitControls, composer;
+// Variables para la animación
 let mixer;
 let animationAction;
+const clock = new THREE.Clock(); // Reloj para la animación
 
 // --- ELEMENTOS DEL DOM ---
 const canvas = document.querySelector('#c');
@@ -20,90 +24,151 @@ const productSelect = document.getElementById('product-select');
 const animationControls = document.getElementById('animation-controls');
 const animationSlider = document.getElementById('animation-slider');
 
-// --- INICIALIZACIÓN DE THREE.JS (sin cambios) ---
+// --- INICIALIZACIÓN DE THREE.JS ---
 const scene = new THREE.Scene();
-// ... (toda la inicialización de escena, cámara, renderer, luces, etc. es la misma)
 scene.background = new THREE.Color("#545454"); 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 1.5, 6);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 2.0);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
+
 orbitControls = new OrbitControls(camera, renderer.domElement);
 orbitControls.enableDamping = true;
 
+// --- INICIALIZACIÓN DE POST-PROCESAMIENTO ---
+const renderScene = new RenderPass(scene, camera);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0, 0.4, 0.85);
+const outputPass = new OutputPass();
+composer = new EffectComposer(renderer);
+composer.addPass(renderScene);
+// Puedes comentar la siguiente línea si quieres desactivar el bloom temporalmente
+// composer.addPass(bloomPass);
+composer.addPass(outputPass);
+
 // --- GESTOR DE CARGA ---
-const loadingManager = new THREE.LoadingManager(() => { loadingOverlay.style.display = 'none'; });
+const loadingManager = new THREE.LoadingManager(() => {
+    loadingOverlay.style.display = 'none';
+});
 const gltfLoader = new GLTFLoader(loadingManager);
 
 // --- FUNCIONES DE LA APLICACIÓN ---
 function loadModel(fileName) {
     if (currentModel) scene.remove(currentModel);
-    // Resetea el mezclador de animación
     mixer = null;
     animationAction = null;
-    animationControls.style.display = 'none'; // Oculta los controles
+    animationControls.style.display = 'none';
     
     gltfLoader.load(`models/${fileName}`, (gltf) => {
         currentModel = gltf.scene;
-        // ... (código de centrado y escalado)
+        const box = new THREE.Box3().setFromObject(currentModel);
+        const center = box.getCenter(new THREE.Vector3());
+        currentModel.position.sub(center);
         scene.add(currentModel);
 
-        // LÓGICA DE ANIMACIÓN
         if (gltf.animations && gltf.animations.length) {
-            console.log("¡Animación encontrada en el modelo!");
-            // 1. Crear el mezclador
             mixer = new THREE.AnimationMixer(currentModel);
-            // 2. Obtener la primera acción de animación
             animationAction = mixer.clipAction(gltf.animations[0]);
-            // 3. Ponerla en pausa y activarla para que podamos controlarla
-            animationAction.paused = true;
             animationAction.play();
-            // 4. Mostrar los controles de animación
+            // Mantenemos el mixer.update(0) aquí para que el modelo aparezca en el fotograma 0
+            mixer.update(0); 
             animationControls.style.display = 'block';
-            animationSlider.value = 0; // Resetea el slider
-        } else {
-            console.log("Este modelo no tiene animaciones.");
+            animationSlider.value = 0;
         }
     });
 }
 
-// ... (highlightActiveProduct y populateProductSelect sin cambios)
+function highlightActiveProduct(fileName) {
+    Array.from(productSelect.options).forEach(option => option.classList.remove('active-product'));
+    const activeOption = document.querySelector(`#product-select option[value="${fileName}"]`);
+    if (activeOption) activeOption.classList.add('active-product');
+}
+
+function populateProductSelect(products) {
+    productSelect.innerHTML = '';
+    products.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.file;
+        option.textContent = product.name;
+        productSelect.appendChild(option);
+    });
+}
 
 // --- CONFIGURACIÓN DE EVENT LISTENERS ---
-// ... (Listeners de búsqueda y selección sin cambios)
+searchBox.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const filteredProducts = allProducts.filter(product => product.name.toLowerCase().includes(searchTerm));
+    populateProductSelect(filteredProducts);
+    highlightActiveProduct(productSelect.value);
+});
 
-// NUEVO: Listener para el slider de animación
+productSelect.addEventListener('change', (e) => {
+    const selectedFile = e.target.value;
+    loadModel(selectedFile);
+    highlightActiveProduct(selectedFile);
+});
+
 animationSlider.addEventListener('input', (e) => {
-    if (animationAction) {
+    if (mixer) {
         const duration = animationAction.getClip().duration;
         const newTime = parseFloat(e.target.value) * duration;
-        
-        // Sincroniza la animación con la posición del slider
+        // Establecemos el tiempo, pero la actualización visual ocurrirá en el bucle animate
         animationAction.time = newTime;
-        
-        // Actualiza el mezclador para que el cambio se refleje en el modelo
-        if (mixer) {
-            mixer.update(0);
-        }
     }
 });
 
 // --- BUCLE DE ANIMACIÓN ---
-// El bucle ahora es mucho más simple
 function animate() {
     requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+
     orbitControls.update();
-    renderer.render(scene, camera);
+
+    // CORRECCIÓN: El mixer debe actualizarse en cada fotograma para que la animación se vea
+    if (mixer) {
+        mixer.update(delta);
+    }
+    
+    composer.render();
 }
 
-// ... (Función main y listener de resize sin cambios)
-// ...
+// --- FUNCIÓN PRINCIPAL ASÍNCRONA ---
+async function main() {
+    try {
+        const response = await fetch('models.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        allProducts = await response.json();
+        populateProductSelect(allProducts);
+
+        if (allProducts.length > 0) {
+            const firstProductFile = allProducts[0].file;
+            productSelect.value = firstProductFile;
+            loadModel(firstProductFile);
+            highlightActiveProduct(firstProductFile);
+        } else {
+            loadingOverlay.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Error en la función main:", error);
+        loadingOverlay.style.display = 'none';
+    }
+}
+
+// --- RESIZE Y INICIO ---
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
 
 main();
 animate();
