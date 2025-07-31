@@ -2,5 +2,9 @@
     {
         "name": "301169",
         "file": "301169-mov.glb"
+    },
+    {
+        "name": "perro",
+        "file": "perro.glb"
     }
 ]
